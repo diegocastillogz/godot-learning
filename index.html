@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Godot Learning Tracker</title>
+<style>
+:root{--bg:#12151a;--card:#1b1f26;--card2:#222731;--line:#2c323c;--text:#e6e8eb;--mute:#8d96a2;--blue:#478cbf;--amber:#e0a43a;--green:#4caf7a;--red:#d9534f}
+*{box-sizing:border-box}
+body{margin:0;font-family:system-ui,-apple-system,Segoe UI,sans-serif;background:var(--bg);color:var(--text);line-height:1.45}
+a{color:#7fb6e0}
+header{padding:16px 24px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;position:sticky;top:0;background:var(--bg);z-index:5}
+h1{font-size:20px;margin:0}
+#syncStatus{font-size:12px;color:var(--mute)}
+main{max-width:1100px;margin:auto;padding:20px 24px 60px}
+button{background:var(--card);color:var(--text);border:1px solid var(--line);border-radius:6px;padding:6px 10px;cursor:pointer;font-size:13px}
+button:hover{border-color:var(--blue)}
+button.primary{background:var(--blue);border-color:var(--blue);color:#fff}
+.dash{display:grid;grid-template-columns:220px 1fr;gap:16px;margin-bottom:20px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:16px}
+.card h3{margin:0 0 12px;font-size:12px;color:var(--mute);font-weight:500;text-transform:uppercase;letter-spacing:.06em}
+.ring{display:flex;flex-direction:column;align-items:center}
+.ring .stats{font-size:12px;color:var(--mute);margin-top:8px;text-align:center}
+.bars .row{display:grid;grid-template-columns:24px 150px 1fr 44px;align-items:center;gap:8px;margin:6px 0;font-size:13px}
+.track{height:10px;background:var(--line);border-radius:5px;overflow:hidden;display:flex}
+.track i{display:block;height:100%}
+.activity{grid-column:1/-1}
+#act{display:flex;align-items:flex-end;gap:3px;height:70px}
+#act div{flex:1;background:var(--blue);border-radius:2px 2px 0 0;min-height:2px}
+.axis{display:flex;justify-content:space-between;font-size:11px;color:var(--mute);margin-top:4px}
+.legend{font-size:12px;color:var(--mute);display:flex;gap:14px;margin-top:10px}
+.legend span::before{content:"";display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:5px;vertical-align:-1px;background:var(--c)}
+.next{margin-bottom:20px;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.next b{color:var(--amber)}
+.module{margin-bottom:12px;padding:0}
+.module>summary{cursor:pointer;list-style:none;display:flex;justify-content:space-between;align-items:center;font-weight:600;padding:14px 16px;gap:10px}
+.module>summary::-webkit-details-marker{display:none}
+.module>summary .ico{font-size:20px;margin-right:8px}
+.module>summary .pct{color:var(--mute);font-weight:400;font-size:13px;display:flex;align-items:center;gap:10px}
+.mini{width:90px;height:6px}
+.topic{border-top:1px solid var(--line)}
+.topic>.head{display:flex;align-items:center;gap:10px;padding:9px 16px;cursor:pointer}
+.topic>.head:hover{background:var(--card2)}
+.st{width:84px;text-align:center;font-size:12px;padding:3px 0;border-radius:12px;border:none;flex-shrink:0}
+.s0{background:var(--line);color:var(--mute)}.s1{background:var(--amber);color:#1a1a1a}.s2{background:var(--green);color:#0d1a12}
+.topic .name{flex:1;font-size:14px}
+.statusrow .st{opacity:.55}.statusrow .st.sel{opacity:1;outline:2px solid var(--text)}
+.topic.done .name{color:var(--mute)}
+.badges{font-size:11px;color:var(--mute);display:flex;gap:8px}
+.chev{color:var(--mute);transition:transform .15s}
+.topic.open .chev{transform:rotate(90deg)}
+.body{display:none;padding:4px 16px 18px 110px;font-size:14px}
+.topic.open .body{display:block}
+.body h4{margin:14px 0 6px;font-size:12px;color:var(--mute);text-transform:uppercase;letter-spacing:.05em;font-weight:500}
+.body p{margin:0}
+.practice{background:var(--card2);border-left:3px solid var(--amber);padding:8px 12px;border-radius:4px}
+.links{margin:0;padding-left:18px}
+.links li{margin:3px 0}
+.videos{display:flex;gap:12px;flex-wrap:wrap}
+.vid{width:220px;text-decoration:none;color:var(--text);font-size:12px}
+.vid img{width:220px;aspect-ratio:16/9;object-fit:cover;border-radius:6px;display:block;margin-bottom:4px;border:1px solid var(--line)}
+.vid:hover img{border-color:var(--blue)}
+textarea{width:100%;min-height:60px;background:var(--bg);border:1px solid var(--line);color:var(--text);border-radius:6px;padding:8px;font:inherit;font-size:13px}
+.statusrow{display:flex;gap:6px;margin-top:6px}
+.add{display:flex;gap:6px;padding:10px 16px;border-top:1px solid var(--line)}
+.add input,dialog input{flex:1;background:var(--bg);border:1px solid var(--line);color:var(--text);border-radius:6px;padding:6px 8px;font-size:13px}
+dialog{background:var(--card);color:var(--text);border:1px solid var(--line);border-radius:10px;max-width:460px;width:92%}
+dialog::backdrop{background:#0009}
+dialog label{display:block;font-size:12px;color:var(--mute);margin:10px 0 4px}
+dialog input{width:100%}
+dialog .note{font-size:12px;color:var(--mute);margin-top:10px}
+.row-end{display:flex;justify-content:flex-end;gap:8px;margin-top:16px}
+@media(max-width:700px){.dash{grid-template-columns:1fr}.bars .row{grid-template-columns:22px 100px 1fr 40px}.body{padding-left:16px}.badges{display:none}.vid,.vid img{width:100%}}
+</style>
+</head>
+<body>
+<header>
+  <div><h1>Godot Learning Tracker</h1><div id="syncStatus"></div></div>
+  <div style="display:flex;gap:6px;flex-wrap:wrap">
+    <button id="saveGh" class="primary">Save to GitHub</button>
+    <button id="settingsBtn">⚙ GitHub</button>
+    <button id="exportBtn">Export</button>
+    <button id="importBtn">Import</button>
+    <input type="file" id="importFile" accept=".json" hidden>
+  </div>
+</header>
+<main>
+  <section class="dash">
+    <div class="card ring">
+      <h3>Overall</h3>
+      <svg width="150" height="150" viewBox="0 0 150 150">
+        <circle cx="75" cy="75" r="62" fill="none" stroke="#2c323c" stroke-width="14"/>
+        <circle id="ringDone" cx="75" cy="75" r="62" fill="none" stroke="#4caf7a" stroke-width="14" transform="rotate(-90 75 75)"/>
+        <circle id="ringLearn" cx="75" cy="75" r="62" fill="none" stroke="#e0a43a" stroke-width="14" transform="rotate(-90 75 75)"/>
+        <text id="ringPct" x="75" y="83" text-anchor="middle" fill="#e6e8eb" font-size="26" font-weight="600"></text>
+      </svg>
+      <div class="stats" id="stats"></div>
+    </div>
+    <div class="card bars">
+      <h3>By module</h3>
+      <div id="bars"></div>
+      <div class="legend"><span style="--c:var(--green)">Done</span><span style="--c:var(--amber)">Learning</span></div>
+    </div>
+    <div class="card activity">
+      <h3>Activity — last 30 days</h3>
+      <div id="act"></div>
+      <div class="axis"><span id="actStart"></span><span>today</span></div>
+    </div>
+  </section>
+  <div class="card next" id="next"></div>
+  <section id="modules"></section>
+</main>
+
+<dialog id="dlg">
+  <h3 style="margin-top:0">GitHub sync</h3>
+  <p class="note" style="margin-top:0">Saves your progress to <code>progress.json</code> in your repo so the GitHub Pages site shows it to anyone. The token is stored only in this browser.</p>
+  <label>Owner (your GitHub username)</label><input id="ghOwner">
+  <label>Repository</label><input id="ghRepo">
+  <label>Branch</label><input id="ghBranch" placeholder="main">
+  <label>Fine-grained token (Contents: read & write, this repo only)</label><input id="ghToken" type="password" placeholder="github_pat_…">
+  <p class="note">Create one at GitHub › Settings › Developer settings › Fine-grained tokens.</p>
+  <div class="row-end"><button id="dlgCancel">Cancel</button><button id="dlgSave" class="primary">Save</button></div>
+</dialog>
+
+<script src="curriculum.js"></script>
+<script>
+const LS='godot-tracker-progress', LSGH='godot-tracker-github', DOCS='https://docs.godotengine.org/en/stable/';
+const LABELS=['To do','Learning','Done'];
+const C=window.CURRICULUM;
+let P={status:{},notes:{},custom:[],log:[],updatedAt:0};
+let open=new Set(), openMods=new Set(C.map(m=>m.id));
+const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const day=d=>d.toISOString().slice(0,10);
+const store={get(k){try{return JSON.parse(localStorage.getItem(k))}catch(e){return null}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}};
+
+function gh(){const g=store.get(LSGH)||{};if(!g.owner&&location.hostname.endsWith('.github.io')){g.owner=location.hostname.split('.')[0];g.repo=location.pathname.split('/')[1]||(g.owner+'.github.io')}return g}
+function modules(){return C.map(m=>({...m,topics:[...m.topics,...P.custom.filter(c=>c.module==m.id).map(c=>({...c,custom:true,docs:[],videos:[]}))]}))}
+function score(ts){const n=ts.length,d=ts.filter(t=>P.status[t.id]==2).length,l=ts.filter(t=>P.status[t.id]==1).length;return{n,d,l,p:n?(d+l*.5)/n:0}}
+function touch(){P.updatedAt=Date.now();store.set(LS,P);setStatus('Unsaved changes — click "Save to GitHub" to publish.');render()}
+function setStatus(t){syncStatus.textContent=t}
+
+function render(){
+ const M=modules(),all=M.flatMap(m=>m.topics),s=score(all),Cc=2*Math.PI*62;
+ ringDone.setAttribute('stroke-dasharray',`${Cc*(s.n?s.d/s.n:0)} ${Cc}`);
+ ringLearn.setAttribute('stroke-dasharray',`0 ${Cc*(s.n?s.d/s.n:0)} ${Cc*(s.n?s.l/s.n:0)} ${Cc}`);
+ ringPct.textContent=Math.round(s.p*100)+'%';
+ stats.innerHTML=`${s.d} done · ${s.l} learning<br>${s.n-s.d-s.l} to do · ${s.n} topics`;
+ bars.innerHTML=M.map(m=>{const k=score(m.topics);return`<div class="row"><span>${m.icon}</span><span>${esc(m.name)}</span><div class="track"><i style="width:${k.n?k.d/k.n*100:0}%;background:var(--green)"></i><i style="width:${k.n?k.l/k.n*100:0}%;background:var(--amber)"></i></div><span style="color:var(--mute);text-align:right">${Math.round(k.p*100)}%</span></div>`}).join('');
+ const days=[...Array(30)].map((_,i)=>{const d=new Date();d.setDate(d.getDate()-29+i);return day(d)});
+ const counts=days.map(d=>P.log.filter(x=>x==d).length),max=Math.max(1,...counts);
+ act.innerHTML=counts.map((c,i)=>`<div title="${days[i]}: ${c} update${c==1?'':'s'}" style="height:${c/max*100}%;opacity:${c?.9:.2}"></div>`).join('');
+ actStart.textContent=days[0];
+ const cur=all.find(t=>P.status[t.id]==1)||all.find(t=>!P.status[t.id]);
+ next.innerHTML=cur?`<span>${P.status[cur.id]==1?'Currently learning':'Up next'}: <b>${esc(cur.name)}</b></span><button data-goto="${cur.id}">Open</button>`:'<span>🎉 Everything done!</span>';
+ modulesEl.innerHTML=M.map(m=>{const k=score(m.topics);return`<details class="card module" data-mod="${m.id}" ${openMods.has(m.id)?'open':''}>
+  <summary><span><span class="ico">${m.icon}</span>${esc(m.name)}</span><span class="pct"><span class="track mini"><i style="width:${k.n?k.d/k.n*100:0}%;background:var(--green)"></i><i style="width:${k.n?k.l/k.n*100:0}%;background:var(--amber)"></i></span>${k.d}/${k.n}</span></summary>
+  ${m.topics.map(t=>topicHTML(t)).join('')}
+  <div class="add"><input placeholder="Add your own topic…" data-addin="${m.id}"><button data-add="${m.id}">Add</button></div></details>`}).join('');
+}
+const modulesEl=document.getElementById('modules');
+function topicHTML(t){
+ const s=P.status[t.id]||0,o=open.has(t.id),yt='https://www.youtube.com/results?search_query='+encodeURIComponent('godot 4 '+t.name);
+ const nd=(t.docs||[]).length,nv=(t.videos||[]).length;
+ return`<div class="topic ${s==2?'done':''} ${o?'open':''}" id="t-${t.id}">
+ <div class="head" data-toggle="${t.id}"><button class="st s${s}" data-cycle="${t.id}">${LABELS[s]}</button><span class="name">${esc(t.name)}</span>
+ <span class="badges">${nd?`📘 ${nd}`:''} ${nv?`▶ ${nv}`:''} ${P.notes[t.id]?'📝':''}</span><span class="chev">›</span></div>
+ ${o?`<div class="body">
+  ${t.desc?`<h4>What you'll learn</h4><p>${esc(t.desc)}</p>`:''}
+  ${t.practice?`<h4>Practice</h4><p class="practice">${esc(t.practice)}</p>`:''}
+  ${nd?`<h4>Godot documentation</h4><ul class="links">${t.docs.map(([n,p])=>`<li><a href="${DOCS+p}" target="_blank" rel="noopener">${esc(n)}</a></li>`).join('')}</ul>`:''}
+  ${nv?`<h4>Videos</h4><div class="videos">${t.videos.map(([n,id])=>`<a class="vid" href="https://www.youtube.com/watch?v=${id}" target="_blank" rel="noopener"><img loading="lazy" src="https://i.ytimg.com/vi/${id}/hqdefault.jpg" alt="">${esc(n)}</a>`).join('')}</div>`:''}
+  <h4>More</h4><ul class="links">${(t.links||[]).map(([n,u])=>`<li><a href="${u}" target="_blank" rel="noopener">${esc(n)}</a></li>`).join('')}
+   <li><a href="${yt}" target="_blank" rel="noopener">Search YouTube: “godot 4 ${esc(t.name)}”</a></li>
+   <li><a href="https://docs.godotengine.org/en/stable/search.html?q=${encodeURIComponent(t.name)}" target="_blank" rel="noopener">Search the Godot docs</a></li></ul>
+  <h4>Status</h4><div class="statusrow">${LABELS.map((l,i)=>`<button class="st s${i==s?i:0}${i==s?" sel":""}" data-set="${t.id}" data-v="${i}">${l}</button>`).join('')}${t.custom?`<button data-del="${t.id}" style="margin-left:auto">Remove topic</button>`:''}</div>
+  <h4>My notes</h4><textarea data-note="${t.id}" placeholder="What I learned, links, problems…">${esc(P.notes[t.id]||'')}</textarea>
+ </div>`:''}</div>`}
+
+function setStatusOf(id,v){if((P.status[id]||0)==v)return;P.status[id]=v;if(v)P.log.push(day(new Date()));if(!v)delete P.status[id];touch()}
+document.addEventListener('click',e=>{
+ const b=e.target.closest('[data-cycle],[data-set],[data-toggle],[data-add],[data-del],[data-goto]');if(!b)return;
+ if(b.dataset.cycle){e.stopPropagation();setStatusOf(b.dataset.cycle,((P.status[b.dataset.cycle]||0)+1)%3)}
+ else if(b.dataset.set)setStatusOf(b.dataset.set,+b.dataset.v);
+ else if(b.dataset.toggle){const id=b.dataset.toggle;open.has(id)?open.delete(id):open.add(id);render()}
+ else if(b.dataset.add)addTopic(b.dataset.add);
+ else if(b.dataset.del){if(confirm('Remove this topic?')){P.custom=P.custom.filter(c=>c.id!=b.dataset.del);delete P.status[b.dataset.del];delete P.notes[b.dataset.del];touch()}}
+ else if(b.dataset.goto){const id=b.dataset.goto,m=modules().find(m=>m.topics.some(t=>t.id==id));openMods.add(m.id);open.add(id);render();document.getElementById('t-'+id).scrollIntoView({behavior:'smooth',block:'center'})}
+});
+document.addEventListener('toggle',e=>{const m=e.target.dataset&&e.target.dataset.mod;if(m)e.target.open?openMods.add(m):openMods.delete(m)},true);
+document.addEventListener('change',e=>{const id=e.target.dataset.note;if(id!==undefined){const v=e.target.value.trim();v?P.notes[id]=v:delete P.notes[id];touch()}});
+document.addEventListener('keydown',e=>{if(e.key=='Enter'&&e.target.dataset.addin)addTopic(e.target.dataset.addin)});
+function addTopic(mod){const i=document.querySelector(`[data-addin="${mod}"]`),v=i.value.trim();if(!v)return;P.custom.push({id:'c'+Date.now(),module:mod,name:v});touch()}
+
+// Export / import
+exportBtn.onclick=()=>{const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify(P,null,2)],{type:'application/json'}));a.download='progress.json';a.click()};
+importBtn.onclick=()=>importFile.click();
+importFile.onchange=async()=>{try{const d=JSON.parse(await importFile.files[0].text());if(!d.status)throw 0;P={...P,...d};touch()}catch(e){alert('Invalid file')}importFile.value=''};
+
+// GitHub
+settingsBtn.onclick=()=>{const g=gh();ghOwner.value=g.owner||'';ghRepo.value=g.repo||'';ghBranch.value=g.branch||'main';ghToken.value=g.token||'';dlg.showModal()};
+dlgCancel.onclick=()=>dlg.close();
+dlgSave.onclick=()=>{store.set(LSGH,{owner:ghOwner.value.trim(),repo:ghRepo.value.trim(),branch:ghBranch.value.trim()||'main',token:ghToken.value.trim()});dlg.close();setStatus('GitHub settings saved.')};
+const b64=s=>btoa(unescape(encodeURIComponent(s)));
+saveGh.onclick=async()=>{
+ const g=gh();if(!g.token||!g.owner||!g.repo){settingsBtn.click();return}
+ const url=`https://api.github.com/repos/${g.owner}/${g.repo}/contents/progress.json`,h={Authorization:'Bearer '+g.token,Accept:'application/vnd.github+json'};
+ setStatus('Saving to GitHub…');
+ try{
+  let sha;const r=await fetch(url+'?ref='+(g.branch||'main'),{headers:h});if(r.ok)sha=(await r.json()).sha;
+  const w=await fetch(url,{method:'PUT',headers:h,body:JSON.stringify({message:'Update progress '+day(new Date()),content:b64(JSON.stringify(P,null,2)),branch:g.branch||'main',sha})});
+  if(!w.ok)throw new Error((await w.json()).message||w.status);
+  setStatus('Saved to GitHub ✓ — the public page updates in about a minute.');
+ }catch(err){setStatus('GitHub save failed: '+err.message)}
+};
+
+// Load: newest of local copy and published progress.json
+(async()=>{
+ const local=store.get(LS);let remote=null;
+ try{const r=await fetch('progress.json?t='+Date.now());if(r.ok)remote=await r.json()}catch(e){}
+ const pick=[local,remote].filter(x=>x&&x.status).sort((a,b)=>(b.updatedAt||0)-(a.updatedAt||0))[0];
+ if(pick)P={...P,...pick};
+ setStatus(pick&&pick===remote?'Showing published progress.':pick?'Showing progress saved in this browser.':'');
+ render();
+})();
+</script>
+</body>
+</html>
